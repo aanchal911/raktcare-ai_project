@@ -1,8 +1,9 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { INITIAL_DONORS, predictDonorMetrics, CAN_RECEIVE_FROM } from "../data/donors";
 import { BloodGroup, Donor, EmergencyRequest } from "../types";
-import { Search, Compass, ShieldCheck, Phone, CheckCircle, Bell, Volume2, Cpu, UserCheck } from "lucide-react";
+import { mlService, MLDonorInput, MLPredictionResponse } from "../services/mlService";
+import { Search, Compass, ShieldCheck, Phone, CheckCircle, Bell, Volume2, Cpu, UserCheck, Brain } from "lucide-react";
 
 interface DonorSearchProps {
   onAddEmergencyRequest: (newRequest: EmergencyRequest) => void;
@@ -16,26 +17,63 @@ export function DonorSearch({ onAddEmergencyRequest, savedFamilyMemberSearchGrou
   const [availableNowOnly, setAvailableNowOnly] = useState(true);
   const [selectedDonorForAction, setSelectedDonorForAction] = useState<Donor | null>(null);
   const [simulatedDispatchState, setSimulatedDispatchState] = useState<"idle" | "broadcasting" | "dispatched">("idle");
+  const [mlPredictions, setMlPredictions] = useState<Map<string, MLPredictionResponse>>(new Map());
+  const [isLoadingML, setIsLoadingML] = useState(false);
 
-  // Filter and score donors using our biology rules & ML algorithms
+  // Load ML predictions for all donors
+  useEffect(() => {
+    const loadMLPredictions = async () => {
+      setIsLoadingML(true);
+      const predictions = new Map<string, MLPredictionResponse>();
+      
+      try {
+        for (const donor of INITIAL_DONORS) {
+          const mlInput = mlService.convertDonorToMLFormat(donor);
+          const prediction = await mlService.predictAvailability(mlInput);
+          predictions.set(donor.id, prediction);
+        }
+        setMlPredictions(predictions);
+      } catch (error) {
+        console.error('Failed to load ML predictions:', error);
+      } finally {
+        setIsLoadingML(false);
+      }
+    };
+
+    loadMLPredictions();
+  }, []);
+
+  // Filter and score donors using ML predictions and biological rules
   const processedDonors = useMemo(() => {
     // Determine which blood groups can donate to the requested patient group
     const compatibleGroups = CAN_RECEIVE_FROM[bloodGroup] || [];
 
     return INITIAL_DONORS.map((donor) => {
-      // Calculate ML metrics \& compatibility rank matching
+      // Get ML prediction for this donor
+      const mlPrediction = mlPredictions.get(donor.id);
+      
+      // Calculate traditional metrics as fallback
       const { isMedicallyEligible, medicalEligibilityReason, responseProbability, overallRankScore } = 
         predictDonorMetrics(donor, bloodGroup);
 
       const isGroupCompatible = compatibleGroups.includes(donor.bloodGroup);
+
+      // Use ML predictions if available, otherwise fallback to traditional scoring
+      const finalAvailabilityProb = mlPrediction ? 
+        Math.round(mlPrediction.availability_probability * 100) : responseProbability;
+      
+      const finalDonorScore = mlPrediction ? 
+        Math.round(mlPrediction.donor_score * 100) : overallRankScore;
 
       return {
         ...donor,
         isGroupCompatible,
         isMedicallyEligible,
         medicalEligibilityReason,
-        responseProbability,
-        overallRankScore,
+        responseProbability: finalAvailabilityProb,
+        overallRankScore: finalDonorScore,
+        mlPrediction,
+        hasMLPrediction: !!mlPrediction
       };
     })
     .filter((donor) => {
@@ -50,10 +88,10 @@ export function DonorSearch({ onAddEmergencyRequest, savedFamilyMemberSearchGrou
 
       return true;
     })
-    // Sort by multi-criteria overall ML rank score descending
+    // Sort by ML-enhanced overall rank score descending
     .sort((a, b) => b.overallRankScore - a.overallRankScore);
 
-  }, [bloodGroup, radius, availableNowOnly]);
+  }, [bloodGroup, radius, availableNowOnly, mlPredictions]);
 
   const handleRequestDonation = (donor: Donor) => {
     setSelectedDonorForAction(donor);
@@ -171,8 +209,8 @@ export function DonorSearch({ onAddEmergencyRequest, savedFamilyMemberSearchGrou
         {/* Informative biological helper warning */}
         <div className="mt-4 border-t border-white/10 pt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-slate-400 font-mono">
           <div className="flex items-center gap-1.5 text-neutral-300">
-            <Cpu className="w-4 h-4 text-red-500" />
-            <span>Smart Biocompatibility active: Matching O- and compatible groups.</span>
+            <Brain className="w-4 h-4 text-red-500" />
+            <span>ML-Enhanced Biocompatibility: {isLoadingML ? 'Loading predictions...' : 'XGBoost models active'}</span>
           </div>
           <div>
             Compatible Donor Groups for {bloodGroup}:{" "}

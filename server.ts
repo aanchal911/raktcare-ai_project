@@ -3,11 +3,13 @@ import path from "path";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
+import fetch from "node-fetch";
 
 dotenv.config();
 
 const app = express();
 const PORT = 3000;
+const ML_BACKEND_URL = process.env.ML_BACKEND_URL || "http://localhost:8000";
 
 app.use(express.json());
 
@@ -45,7 +47,73 @@ Core Donation Knowledge:
 
 Formulate your answers using clean Markdown formatting. Use bullet points and bolding for readability. Keeps responses friendly, futuristic in tone, and highly reassuring. Mention blood compatibility rules if asked.`;
 
-// API routes
+// ML API Proxy routes
+app.post("/api/ml/predict/availability", async (req, res) => {
+  try {
+    const response = await fetch(`${ML_BACKEND_URL}/predict/availability`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(req.body)
+    });
+    const data = await response.json();
+    res.json(data);
+  } catch (error) {
+    console.error("ML prediction error:", error);
+    res.status(500).json({ error: "ML service unavailable" });
+  }
+});
+
+app.post("/api/ml/predict/compatibility", async (req, res) => {
+  try {
+    const response = await fetch(`${ML_BACKEND_URL}/predict/compatibility`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(req.body)
+    });
+    const data = await response.json();
+    res.json(data);
+  } catch (error) {
+    console.error("Compatibility check error:", error);
+    res.status(500).json({ error: "ML service unavailable" });
+  }
+});
+
+app.post("/api/ml/predict/ranking", async (req, res) => {
+  try {
+    const response = await fetch(`${ML_BACKEND_URL}/predict/ranking`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(req.body)
+    });
+    const data = await response.json();
+    res.json(data);
+  } catch (error) {
+    console.error("Donor ranking error:", error);
+    res.status(500).json({ error: "ML service unavailable" });
+  }
+});
+
+app.get("/api/ml/compatible-donors/:recipient_type", async (req, res) => {
+  try {
+    const response = await fetch(`${ML_BACKEND_URL}/compatible-donors/${req.params.recipient_type}`);
+    const data = await response.json();
+    res.json(data);
+  } catch (error) {
+    console.error("Compatible donors error:", error);
+    res.status(500).json({ error: "ML service unavailable" });
+  }
+});
+
+app.get("/api/ml/model-info", async (req, res) => {
+  try {
+    const response = await fetch(`${ML_BACKEND_URL}/model-info`);
+    const data = await response.json();
+    res.json(data);
+  } catch (error) {
+    console.error("Model info error:", error);
+    res.status(500).json({ error: "ML service unavailable" });
+  }
+});
 app.post("/api/chat", async (req, res) => {
   try {
     const { message, history } = req.body;

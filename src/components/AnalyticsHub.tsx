@@ -1,9 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "motion/react";
-import { TrendingUp, BarChart3, MapPin, Activity, HelpCircle, ShieldAlert, Cpu } from "lucide-react";
+import { TrendingUp, BarChart3, MapPin, Activity, HelpCircle, ShieldAlert, Cpu, Brain } from "lucide-react";
+import { mlService } from "../services/mlService";
 
 export function AnalyticsHub() {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [modelInfo, setModelInfo] = useState<any>(null);
+
+  useEffect(() => {
+    mlService.getModelInfo().then(setModelInfo).catch(() => {});
+  }, []);
 
   // Chart 1 Data: Most needed blood groups (Demand index)
   const groupDemand = [
@@ -73,6 +79,35 @@ export function AnalyticsHub() {
           <span className="text-[10px] font-mono text-slate-400 uppercase tracking-widest block font-bold">Regional Active Donors</span>
           <h3 className="text-xl font-bold text-amber-500">2,451 Active</h3>
           <p className="text-xs text-slate-400">88% connected to immediate SMS alerts</p>
+        </div>
+      </div>
+
+      {/* ML Model Status Panel */}
+      <div className="bg-white/5 backdrop-blur-xl rounded-2xl p-5 border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
+        <div className="flex items-center gap-2 mb-4">
+          <Brain className="w-5 h-5 text-red-500" />
+          <h4 className="text-sm font-bold text-transparent-gradient font-mono uppercase tracking-wider">ML Model Performance</h4>
+          <span className={`ml-auto text-[9px] font-mono px-2 py-0.5 rounded border ${
+            modelInfo && !modelInfo.error 
+              ? 'bg-green-950/40 text-green-400 border-green-500/20' 
+              : 'bg-amber-950/40 text-amber-400 border-amber-500/20'
+          }`}>
+            {modelInfo && !modelInfo.error ? 'LIVE' : 'FALLBACK MODE'}
+          </span>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs font-mono">
+          {[
+            { label: 'Availability Model', value: 'XGBoost CLF', sub: 'F1: 0.7457 · AUC: 0.8607' },
+            { label: 'Frequency Model', value: 'XGBoost REG', sub: 'R²: 0.5556 · MAE: 0.3987' },
+            { label: 'Compatibility Engine', value: 'Rule-Based', sub: '64-entry lookup table' },
+            { label: 'Donor Ranking', value: 'RaktScore', sub: '4-factor composite formula' }
+          ].map((item) => (
+            <div key={item.label} className="bg-black/30 rounded-xl p-3 border border-white/5">
+              <span className="text-slate-500 block text-[9px] uppercase tracking-wider mb-1">{item.label}</span>
+              <span className="font-bold text-slate-100 block">{item.value}</span>
+              <span className="text-slate-500 text-[9px] block mt-0.5">{item.sub}</span>
+            </div>
+          ))}
         </div>
       </div>
 
