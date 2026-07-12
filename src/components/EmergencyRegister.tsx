@@ -224,7 +224,7 @@ export function EmergencyRegister({ requests, onSetRequests, onSelectSearchGroup
 
       {/* Requests table listing */}
       <div className="space-y-3.5">
-        <AnimatePresence mode="popLayout text-muted-foreground">
+        <AnimatePresence mode="popLayout">
           {requests.length > 0 ? (
             requests.map((req) => {
               const matchedDonationGroups = CAN_RECEIVE_FROM[req.bloodGroup] || [];

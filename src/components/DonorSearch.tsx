@@ -229,7 +229,7 @@ export function DonorSearch({ onAddEmergencyRequest, savedFamilyMemberSearchGrou
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <AnimatePresence mode="popLayout text-muted-foreground">
+          <AnimatePresence mode="popLayout">
             {processedDonors.length > 0 ? (
               processedDonors.map((donor, index) => {
                 const isRankOne = index === 0 && donor.overallRankScore > 65;

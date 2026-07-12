@@ -5,7 +5,8 @@ import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
 import fetch from "node-fetch";
 
-dotenv.config();
+dotenv.config({ path: ".env.local" });
+dotenv.config(); // fallback to .env
 
 const app = express();
 const PORT = 3000;

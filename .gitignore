@@ -1,8 +1,24 @@
 node_modules/
-build/
 dist/
 coverage/
 .DS_Store
 *.log
-.env*
+
+# Env files — keep example, ignore real ones
+.env
+.env.local
+.env.production
 !.env.example
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# Trained model artifacts — generated on Render at build time
+backend/models/*.pkl
+backend/models/*.json
+models/*.pkl
+models/*.json

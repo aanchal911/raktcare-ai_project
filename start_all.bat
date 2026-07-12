@@ -5,7 +5,7 @@ echo ============================================================
 
 echo.
 echo [1] Starting FastAPI ML Backend on port 8000...
-start "RaktCare ML Backend" cmd /k ".venv\Scripts\activate.bat && uvicorn ml_backend:app --host 0.0.0.0 --port 8000 --reload"
+start "RaktCare ML Backend" cmd /k "set PYTHONIOENCODING=utf-8 && uvicorn ml_backend:app --host 0.0.0.0 --port 8000 --reload"
 
 timeout /t 3 /nobreak >nul
 

@@ -235,7 +235,7 @@ export function FamilyVault({ onSelectSearchGroup, onAddEmergencyRequest, onTran
 
       {/* Grid of Registered Relatives cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <AnimatePresence mode="popLayout text-muted-foreground">
+        <AnimatePresence mode="popLayout">
           {members.length > 0 ? (
             members.map((member) => {
               const matches = CAN_RECEIVE_FROM[member.bloodGroup] || [];
