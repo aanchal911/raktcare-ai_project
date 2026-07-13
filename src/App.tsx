@@ -13,6 +13,7 @@ import { PitchDeck } from "./components/PitchDeck";
 import { NotificationToastContainer, ToastAlert, playNotificationSynthSound } from "./components/NotificationToastContainer";
 import { getStoredEmergencyRequests, saveEmergencyRequests } from "./data/donors";
 import { BloodGroup, EmergencyRequest } from "./types";
+import { useLang, Lang } from "./LangContext";
 import { DonorHealthPassport } from "./components/DonorHealthPassport";
 import { 
   Heart, 
@@ -34,6 +35,7 @@ import {
 } from "lucide-react";
 
 export default function App() {
+  const { lang, setLang, t } = useLang();
   const [activeTab, setActiveTab] = useState<string>("home");
   const [selectedSearchGroup, setSelectedSearchGroup] = useState<BloodGroup>("O+");
   const [emergencyRequests, setEmergencyRequests] = useState<EmergencyRequest[]>([]);
@@ -170,7 +172,7 @@ export default function App() {
                 </button>
               </div>
               <span className="text-[10px] text-slate-400 font-mono tracking-wider block">
-                SMART BLOOD DONOR ECOSYSTEM
+                {t.tagline}
               </span>
             </div>
           </div>
@@ -194,8 +196,24 @@ export default function App() {
             </div>
           </div>
 
-          {/* Real-time UTC clock */}
+          {/* Real-time UTC clock + Language Switcher */}
           <div className="flex items-center gap-3 self-end md:self-auto text-xs font-mono text-slate-400">
+            {/* Language Switcher */}
+            <div className="flex items-center gap-1 bg-white/5 border border-white/10 rounded-xl p-1">
+              {(["en", "hi", "gu"] as Lang[]).map((l) => (
+                <button
+                  key={l}
+                  onClick={() => setLang(l)}
+                  className={`px-2.5 py-1 rounded-lg text-[10px] font-bold font-mono transition-all cursor-pointer ${
+                    lang === l
+                      ? "bg-red-600 text-white shadow-sm"
+                      : "text-slate-400 hover:text-white"
+                  }`}
+                >
+                  {l === "en" ? "EN" : l === "hi" ? "हि" : "ગુ"}
+                </button>
+              ))}
+            </div>
             <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-3 py-1.5 backdrop-blur-md">
               <Clock className="w-3.5 h-3.5 text-red-400 animate-[spin_10s_linear_infinite]" />
               <span>{timeStr || "UTC Line Synced"}</span>
@@ -217,15 +235,15 @@ export default function App() {
               
               <div className="space-y-1.5">
                 {[
-                  { id: "home", label: "Dashboard Home", icon: Home },
-                  { id: "search", label: "Smart Donor Finder", icon: Search },
-                  { id: "passport", label: "Donor Health Passport", icon: IdCard },
-                  { id: "vault", label: "Family Emergency Vault", icon: Lock, badge: "Sec" },
-                  { id: "requests", label: "Active Emergency SOS", icon: ShieldAlert, badge: activeSOSRequestsCount > 0 ? String(activeSOSRequestsCount) : undefined },
-                  { id: "compatibility", label: "Compatibility Graph", icon: ArrowRightLeft },
-                  { id: "awareness", label: "Awareness & Myths", icon: BookOpen },
-                  { id: "analytics", label: "Diagnostic Analytics", icon: Workflow },
-                  { id: "assistant", label: "RaktCare Smart AI", icon: Cpu, badge: "GenAI" }
+                  { id: "home", label: t.dashboardHome, icon: Home },
+                  { id: "search", label: t.donorFinder, icon: Search },
+                  { id: "passport", label: t.healthPassport, icon: IdCard },
+                  { id: "vault", label: t.familyVault, icon: Lock, badge: "Sec" },
+                  { id: "requests", label: t.emergencySOS, icon: ShieldAlert, badge: activeSOSRequestsCount > 0 ? String(activeSOSRequestsCount) : undefined },
+                  { id: "compatibility", label: t.compatibility, icon: ArrowRightLeft },
+                  { id: "awareness", label: t.awareness, icon: BookOpen },
+                  { id: "analytics", label: t.analytics, icon: Workflow },
+                  { id: "assistant", label: t.assistant, icon: Cpu, badge: "GenAI" }
                 ].map((item) => {
                   const Icon = item.icon;
                   const isCurrent = activeTab === item.id;
@@ -277,7 +295,7 @@ export default function App() {
                 onClick={() => { setActiveTab("requests") }}
                 className="w-full text-center py-2 bg-red-600 hover:bg-red-500 rounded-xl text-xs font-bold font-mono tracking-wider transition-all cursor-pointer text-white shadow-lg shadow-red-900/40"
               >
-                LOG EMERGENCY SIGNAL
+                {t.logEmergency}
               </button>
             </div>
 
@@ -346,7 +364,7 @@ export default function App() {
                             onClick={() => setActiveTab("search")}
                             className="py-3 bg-white/10 hover:bg-white/15 rounded-xl border border-white/10 hover:border-white/20 text-slate-100 transition-all cursor-pointer text-center font-bold"
                           >
-                            Find Donor
+                            {t.findDonor}
                           </button>
                           
                           <button
@@ -354,7 +372,7 @@ export default function App() {
                             onClick={() => setActiveTab("requests")}
                             className="py-3 bg-red-600 hover:bg-red-500 rounded-xl text-white text-center transition-all cursor-pointer shadow-[0_0_20px_rgba(220,38,38,0.3)] font-bold"
                           >
-                            SOS Request
+                            {t.sosRequest}
                           </button>
                         </div>
 
@@ -364,14 +382,14 @@ export default function App() {
                             onClick={handleBecomeDonorPlaceholder}
                             className="py-2 bg-white/5 hover:bg-white/10 rounded-xl border border-white/5 text-slate-300 hover:text-white transition-colors cursor-pointer text-center"
                           >
-                            Become Donor
+                            {t.becomeDonor}
                           </button>
                           <button
                             id="btn-hero-learn"
                             onClick={() => setActiveTab("awareness")}
                             className="py-2 bg-white/5 hover:bg-white/10 rounded-xl border border-white/5 text-slate-300 hover:text-white transition-all cursor-pointer text-center"
                           >
-                            Learn Donation
+                            {t.learnDonation}
                           </button>
                         </div>
 
