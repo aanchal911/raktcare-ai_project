@@ -4,11 +4,15 @@ coverage/
 .DS_Store
 *.log
 
-# Env files — keep example, ignore real ones
+# Env files
 .env
 .env.local
 .env.production
-!.env.example
+frontend/.env
+frontend/.env.local
+frontend/.env.production
+!frontend/.env.example
+!backend/.env.example
 
 # Python
 __pycache__/
@@ -17,8 +21,19 @@ __pycache__/
 .venv/
 venv/
 
-# Trained model artifacts — generated on Render at build time
-backend/models/*.pkl
-backend/models/*.json
+# Trained model artifacts — generated at build time on Render
 models/*.pkl
 models/*.json
+backend/models/*.pkl
+backend/models/*.json
+
+# Root-level duplicate data files
+/blood_compatibility_lookup.csv
+/blood_donation_registry_ml_ready.csv
+/blood_donor_dataset.csv
+/blood_donation.csv
+
+# Junk
+server_output.txt
+metadata.json
+*.ipynb

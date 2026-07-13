@@ -201,7 +201,7 @@ class MLService {
     blood_group?: string;
     limit?: number;
     offset?: number;
-  }): Promise<{ donors: CSVDonor[]; total: number }> {
+  }): Promise<{ donors: any[]; total: number }> {
     try {
       const q = new URLSearchParams({
         scope: params.scope || 'local',

@@ -1,6 +1,0 @@
-{
-  "name": "RaktCare AI",
-  "description": "Smart Emergency Blood Donor Ecosystem with real-time predictive analytics, AI donor finder, compatibility visualizer, and emergency request platform.",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}

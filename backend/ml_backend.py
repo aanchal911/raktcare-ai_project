@@ -21,18 +21,12 @@ logger = logging.getLogger(__name__)
 # Initialize FastAPI
 app = FastAPI(title="RaktCare AI API", version="1.0.0")
 
-# CORS middleware — allow Vercel frontend + local dev
+# CORS — allow Vercel + local dev
 import os
-ALLOWED_ORIGINS = os.getenv(
-    "ALLOWED_ORIGINS",
-    "http://localhost:3000,http://localhost:5173"
-).split(",")
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=ALLOWED_ORIGINS,
-    allow_origin_regex=r"https://.*\.vercel\.app",
-    allow_credentials=True,
+    allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
