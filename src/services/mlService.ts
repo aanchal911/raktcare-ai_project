@@ -194,6 +194,46 @@ class MLService {
     }
   }
 
+  async getDonors(params: {
+    scope?: 'local' | 'global';
+    state?: string;
+    city?: string;
+    blood_group?: string;
+    limit?: number;
+    offset?: number;
+  }): Promise<{ donors: CSVDonor[]; total: number }> {
+    try {
+      const q = new URLSearchParams({
+        scope: params.scope || 'local',
+        state: params.state || 'Gujarat',
+        ...(params.city && { city: params.city }),
+        ...(params.blood_group && { blood_group: params.blood_group }),
+        limit: String(params.limit || 50),
+        offset: String(params.offset || 0),
+      });
+      const response = await fetch(`${this.baseUrl}/donors?${q}`);
+      if (!response.ok) throw new Error('Failed to fetch donors');
+      return await response.json();
+    } catch (error) {
+      console.error('Get Donors Error:', error);
+      return { donors: [], total: 0 };
+    }
+  }
+
+  async getDonorFilters(): Promise<{ states: string[]; cities_by_state: Record<string, string[]> }> {
+    try {
+      const response = await fetch(`${this.baseUrl}/donors/filters`);
+      if (!response.ok) throw new Error('Failed to fetch filters');
+      return await response.json();
+    } catch (error) {
+      console.error('Get Filters Error:', error);
+      return {
+        states: ['Gujarat', 'Maharashtra', 'Delhi', 'Karnataka', 'Tamil Nadu'],
+        cities_by_state: { Gujarat: ['Ahmedabad', 'Surat', 'Vadodara'] }
+      };
+    }
+  }
+
   async getModelInfo(): Promise<any> {
     try {
       const response = await fetch(`${this.baseUrl}/model-info`);

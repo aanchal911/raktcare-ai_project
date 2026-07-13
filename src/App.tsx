@@ -13,6 +13,7 @@ import { PitchDeck } from "./components/PitchDeck";
 import { NotificationToastContainer, ToastAlert, playNotificationSynthSound } from "./components/NotificationToastContainer";
 import { getStoredEmergencyRequests, saveEmergencyRequests } from "./data/donors";
 import { BloodGroup, EmergencyRequest } from "./types";
+import { DonorHealthPassport } from "./components/DonorHealthPassport";
 import { 
   Heart, 
   Search, 
@@ -29,7 +30,7 @@ import {
   Clock, 
   BookOpen, 
   Workflow,
-  Tv
+  IdCard
 } from "lucide-react";
 
 export default function App() {
@@ -217,8 +218,8 @@ export default function App() {
               <div className="space-y-1.5">
                 {[
                   { id: "home", label: "Dashboard Home", icon: Home },
-                  { id: "pitch", label: "RaktCare AI Pitch Deck", icon: Tv, badge: "Deck" },
                   { id: "search", label: "Smart Donor Finder", icon: Search },
+                  { id: "passport", label: "Donor Health Passport", icon: IdCard },
                   { id: "vault", label: "Family Emergency Vault", icon: Lock, badge: "Sec" },
                   { id: "requests", label: "Active Emergency SOS", icon: ShieldAlert, badge: activeSOSRequestsCount > 0 ? String(activeSOSRequestsCount) : undefined },
                   { id: "compatibility", label: "Compatibility Graph", icon: ArrowRightLeft },
@@ -454,17 +455,16 @@ export default function App() {
                   </div>
                 )}
 
-                {/* 1.5 RAKTCARE AI PITCH DECK */}
-                {activeTab === "pitch" && (
+                {/* 1.5 PITCH DECK REMOVED */}
+
+                {/* 2. DONOR HEALTH PASSPORT */}
+                {activeTab === "passport" && (
                   <div>
-                    <PitchDeck 
-                      onGoToDashboard={() => setActiveTab("home")}
-                      onGoToSOS={() => setActiveTab("requests")}
-                    />
+                    <DonorHealthPassport />
                   </div>
                 )}
 
-                {/* 2. SMART DONOR SEARCH VIEW */}
+                {/* 3. SMART DONOR SEARCH VIEW */}
                 {activeTab === "search" && (
                   <div>
                     <DonorSearch 

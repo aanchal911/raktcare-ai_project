@@ -37,6 +37,26 @@ export interface EmergencyRequest {
   matchedDonorsResultCount?: number;
 }
 
+export interface CSVDonor {
+  id: string;
+  name: string;
+  gender: string;
+  age: number;
+  blood_group: string;
+  phone: string;
+  email: string;
+  city: string;
+  state: string;
+  last_donation_date: string;
+  total_donations: number;
+  eligible: boolean;
+  medical_condition: string | null;
+  weight_kg: number;
+  hemoglobin: number;
+  donation_center: string;
+  registration_date: string;
+}
+
 export interface ChatMessage {
   id: string;
   role: 'user' | 'model';

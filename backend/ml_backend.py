@@ -159,6 +159,7 @@ def encode_donor_features(donor: DonorInput) -> np.ndarray:
 async def startup_event():
     """Load models on startup"""
     success = load_models()
+    load_donor_data()
     if not success:
         logger.error("Failed to load models - some endpoints may not work")
 
@@ -311,6 +312,87 @@ async def get_compatible_donors(recipient_type: str):
         
     except Exception as e:
         logger.error(f"Compatible donors error: {str(e)}")
+        raise HTTPException(status_code=400, detail=str(e))
+
+# Load donor CSV data
+donor_df: pd.DataFrame = None
+
+def load_donor_data():
+    global donor_df
+    try:
+        donor_df = pd.read_csv("blood_donation.csv")
+        donor_df = donor_df.fillna("")
+        logger.info(f"Loaded {len(donor_df)} donors from CSV")
+    except Exception as e:
+        logger.error(f"Error loading donor CSV: {str(e)}")
+
+@app.get("/donors")
+async def get_donors(
+    scope: str = "local",
+    state: str = "Gujarat",
+    city: str = "",
+    blood_group: str = "",
+    limit: int = 50,
+    offset: int = 0
+):
+    """Get donors from CSV with filters"""
+    try:
+        if donor_df is None:
+            raise HTTPException(status_code=503, detail="Donor data not loaded")
+        
+        df = donor_df.copy()
+        
+        if scope == "local":
+            df = df[df["State"] == state]
+        
+        if city:
+            df = df[df["City"] == city]
+        
+        if blood_group:
+            df = df[df["Blood_Group"] == blood_group]
+        
+        total = len(df)
+        df = df.iloc[offset:offset + limit]
+        
+        donors = []
+        for _, row in df.iterrows():
+            donors.append({
+                "id": str(row["Donor_ID"]),
+                "name": row["Full_Name"],
+                "gender": row["Gender"],
+                "age": int(row["Age"]),
+                "blood_group": row["Blood_Group"],
+                "phone": str(row["Contact_Number"]),
+                "email": row["Email"],
+                "city": row["City"],
+                "state": row["State"],
+                "last_donation_date": row["Last_Donation_Date"],
+                "total_donations": int(row["Total_Donations"]),
+                "eligible": row["Eligible_for_Donation"] == "Yes",
+                "medical_condition": row["Medical_Condition"] if row["Medical_Condition"] else None,
+                "weight_kg": float(row["Weight_kg"]),
+                "hemoglobin": float(row["Hemoglobin_g_dL"]),
+                "donation_center": row["Donation_Center"],
+                "registration_date": row["Registration_Date"]
+            })
+        
+        return {"donors": donors, "total": total, "offset": offset, "limit": limit}
+    except Exception as e:
+        logger.error(f"Donors fetch error: {str(e)}")
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.get("/donors/filters")
+async def get_donor_filters():
+    """Get available states and cities for filters"""
+    try:
+        if donor_df is None:
+            raise HTTPException(status_code=503, detail="Donor data not loaded")
+        states = sorted(donor_df["State"].unique().tolist())
+        cities_by_state = {}
+        for state in states:
+            cities_by_state[state] = sorted(donor_df[donor_df["State"] == state]["City"].unique().tolist())
+        return {"states": states, "cities_by_state": cities_by_state}
+    except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
 @app.get("/model-info")
