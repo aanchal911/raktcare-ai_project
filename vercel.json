@@ -6,7 +6,7 @@
     { "source": "/api/chat", "destination": "/api/chat" },
     {
       "source": "/api/ml/:path*",
-      "destination": "https://raktcare-api.onrender.com/:path*"
+      "destination": "https://raktcare-ai-project.onrender.com/:path*"
     },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
